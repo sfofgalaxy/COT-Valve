@@ -1,0 +1,7 @@
+{
+  "model": "qwq_32b",
+  "dataset": "mixchain_z_gsm8k",
+  "strategy": "valve_plus_p",
+  "output_dir": "./cot_valve_output",
+  "timestamp": "2025-04-09 16:02:02"
+}
