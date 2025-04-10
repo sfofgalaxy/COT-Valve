@@ -156,7 +156,7 @@ def main():
     train_parser.add_argument("--dataset", type=str, default="mixchain_z_gsm8k", 
                              choices=["mixchain_z_gsm8k", "mixchain_z_prm12k", "mixchain_c_limo"], 
                              help="训练数据集")
-    train_parser.add_argument("--strategy", type=str, default="standard", 
+    train_parser.add_argument("--strategy", type=str, default="valve_plus_p", 
                              choices=["standard", "valve_plus_plus", "valve_plus_p"], 
                              help="训练策略")
     train_parser.add_argument("--output_dir", type=str, default="./cot_valve_output", 

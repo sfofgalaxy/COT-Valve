@@ -1,5 +1,22 @@
+# 调试模式配置
+DEBUG_MODE = False  # 默认为调试模式
+
+# 根据调试模式选择模型路径
+if DEBUG_MODE:
+    MODEL_PATHS = {
+        "qwq_32b": "/data_sde/lyl/QwQ-32B-AWQ",
+        "deepseek_r1_32b": "/data_sde/lyl/deepseek-r1-distill-qwen-32b-awq",
+        "deepseek_r1_14b": "/data_sde/lyl/deepseek-r1-distill-qwen-14b-awq"
+    }
+else:
+    MODEL_PATHS = {
+        "qwq_32b": "~/data/model/QwQ-32B-AWQ",
+        "deepseek_r1_32b": "~/data/model/deepseek-r1-distill-qwen-32b-awq",
+        "deepseek_r1_14b": "~/data/model/deepseek-r1-distill-qwen-14b-awq"
+    }
+
 MODEL_CONFIG = {
-    "base_model_path": "/data_sde/lyl/QwQ-32B-AWQ", # 默认模型，可通过命令行参数更改
+    "base_model_path": MODEL_PATHS["qwq_32b"], # 默认模型，可通过命令行参数更改
     "output_dir": "./cot_valve_output",
     "lora_rank": 32,
     "lora_alpha": 64,
@@ -9,7 +26,7 @@ MODEL_CONFIG = {
 DATA_CONFIG = {
     "train_dataset_path": "horseee/MixChain-Z-GSM8K", # 默认使用MixChain-Z-GSM8K
     "eval_dataset_path": "gsm8k", # 评估数据集
-    "dataset_config_name": "main", # for GSM8K
+    "dataset_config_name": "default", # 使用default配置
     "question_column": "question",
     "solution_column_prefix": "solution_", # MixChain数据集中的solution列名格式
     "max_seq_length": 2048,
@@ -37,11 +54,7 @@ GENERATION_CONFIG = {
      "temperature": 1.0, # 如果do_sample=True
      "top_p": 1.0,       # 如果do_sample=True
 }
-MODEL_PATHS = {
-    "qwq_32b": "/data_sde/lyl/QwQ-32B-AWQ",
-    "deepseek_r1_32b": "/data_sde/lyl/deepseek-r1-distill-qwen-32b-awq",
-    "deepseek_r1_14b": "/data_sde/lyl/deepseek-r1-distill-qwen-14b-awq"
-}
+
 DATASET_PATHS = {
     "mixchain_z_gsm8k": "horseee/MixChain-Z-GSM8K",
     "mixchain_z_prm12k": "horseee/MixChain-Z-PRM12K",

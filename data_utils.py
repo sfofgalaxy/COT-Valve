@@ -7,6 +7,58 @@ from config import MODEL_CONFIG, DATA_CONFIG, TRAINING_CONFIG
 # 初始化时不立即加载tokenizer，而是在需要时加载
 tokenizer = None
 
+# 定义DatasetWrapper类，用于包装处理后的数据集
+class DatasetWrapper:
+    def __init__(self, examples):
+        self.examples = examples
+    
+    def __len__(self):
+        return len(self.examples)
+    
+    def __getitem__(self, i):
+        return self.examples[i]
+    
+    def map(self, function, **kwargs):
+        """
+        实现map方法，与Hugging Face数据集接口兼容
+        """
+        # 检查函数是否需要特定参数
+        import inspect
+        sig = inspect.signature(function)
+        
+        # 创建一个包含所有可能需要的参数的字典
+        func_kwargs = {}
+        
+        # 检查是否需要tokenizer参数
+        if 'tokenizer' in sig.parameters:
+            from data_utils import get_tokenizer
+            func_kwargs['tokenizer'] = get_tokenizer()
+        
+        # 检查是否需要processing_class参数
+        if 'processing_class' in sig.parameters:
+            # 创建一个简单的处理函数，而不是一个类
+            from data_utils import get_tokenizer
+            tokenizer = get_tokenizer()
+            eos_token_id = tokenizer.eos_token_id
+            
+            def simple_processor(text):
+                # 返回一个包含input_ids键的字典，而不是一个字符串
+                return {"input_ids": tokenizer.encode(text)}
+            
+            # 添加eos_token_id属性到函数
+            simple_processor.eos_token_id = eos_token_id
+            
+            func_kwargs['processing_class'] = simple_processor
+        
+        # 检查是否需要dataset_text_field参数
+        if 'dataset_text_field' in sig.parameters:
+            func_kwargs['dataset_text_field'] = "text"
+        
+        # 应用函数到每个样本
+        mapped_examples = [function(example, **func_kwargs) for example in self.examples]
+        
+        return DatasetWrapper(mapped_examples)
+
 def get_tokenizer(model_path=None):
     global tokenizer
     if tokenizer is None:
@@ -173,16 +225,6 @@ def preprocess_dataset_for_sft(dataset, use_all_solutions=True, strategy=None):
     if len(processed_examples) == 0:
         raise ValueError("没有有效的训练样本！请检查数据集和处理逻辑。")
     
-    class DatasetWrapper:
-        def __init__(self, examples):
-            self.examples = examples
-        
-        def __len__(self):
-            return len(self.examples)
-        
-        def __getitem__(self, i):
-            return self.examples[i]
-    
     return DatasetWrapper(processed_examples)
 
 def get_valve_plus_p_dataset(dataset, current_stage, total_stages):
@@ -243,7 +285,7 @@ def load_and_prepare_data(model_path=None, dataset_path=None, for_training=True,
     if dataset_path is None:
         dataset_path = DATA_CONFIG["train_dataset_path"] if for_training else DATA_CONFIG["eval_dataset_path"]
     
-    config_name = DATA_CONFIG.get("dataset_config_name")
+    config_name = DATA_CONFIG.get("dataset_config_name", "default")  # 使用default作为默认配置
     split = "train" if for_training else "test"  # 或"validation"
     
     print(f"Loading dataset from {dataset_path}, split={split}, config={config_name}")

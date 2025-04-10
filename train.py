@@ -47,10 +47,6 @@ def train_valve_plus_plus(model, dataset, training_args, tokenizer):
         model=model,
         args=training_args,
         train_dataset=dataset,
-        dataset_text_field="text",
-        max_seq_length=DATA_CONFIG["max_seq_length"],
-        tokenizer=tokenizer,
-        packing=False,
         callbacks=[beta_sampling_callback]
     )
     
@@ -123,10 +119,6 @@ def train_valve_plus_p(model_path, dataset_path, output_dir, tokenizer):
             model=model,
             args=training_args,
             train_dataset=dataset,
-            dataset_text_field="text",
-            max_seq_length=DATA_CONFIG["max_seq_length"],
-            tokenizer=tokenizer,
-            packing=False,
         )
         
         # 训练当前阶段
@@ -152,7 +144,7 @@ def main():
     parser.add_argument("--dataset", type=str, default="mixchain_z_gsm8k", 
                         choices=["mixchain_z_gsm8k", "mixchain_z_prm12k", "mixchain_c_limo"], 
                         help="训练数据集")
-    parser.add_argument("--strategy", type=str, default="standard", 
+    parser.add_argument("--strategy", type=str, default="valve_plus_p", 
                         choices=["standard", "valve_plus_plus", "valve_plus_p"], 
                         help="训练策略")
     parser.add_argument("--output_dir", type=str, default=None, 
@@ -232,10 +224,6 @@ def main():
                 model=model,
                 args=training_args,
                 train_dataset=train_dataset,
-                dataset_text_field="text",
-                max_seq_length=DATA_CONFIG["max_seq_length"],
-                tokenizer=tokenizer,
-                packing=False,
             )
             
             print("开始标准SFT训练...")
